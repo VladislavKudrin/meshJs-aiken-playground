@@ -3,7 +3,6 @@ import {
   mConStr,
   MeshTxBuilder,
   MeshWallet,
-  metadataToCip68,
   resolveScriptHash,
   stringToHex,
   type UTxO,

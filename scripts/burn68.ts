@@ -6,7 +6,6 @@ import {
   mConStr,
   MeshTxBuilder,
   MeshWallet,
-  metadataToCip68,
   resolveScriptHash,
   serializePlutusScript,
   stringToHex,
@@ -18,7 +17,10 @@ import { hideBin } from "yargs/helpers";
 import validator from "../static/plutus.json";
 import { applyParamsToScript } from "@meshsdk/core-csl";
 
-async function awaitCollateral(maxRetries = 10): Promise<UTxO | null> {
+async function awaitCollateral(
+  wallet: MeshWallet,
+  maxRetries: number = 10,
+): Promise<UTxO | null> {
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     const [collateral] = await wallet.getCollateral();
 
@@ -27,6 +29,7 @@ async function awaitCollateral(maxRetries = 10): Promise<UTxO | null> {
     }
 
     console.log(`Attempt ${attempt}: No collateral yet. Retrying...`);
+    await wallet.createCollateral();
     await new Promise((res) => setTimeout(res, 5000));
   }
 
@@ -55,7 +58,7 @@ const wallet = new MeshWallet({
 });
 
 const utxos = await wallet.getUtxos();
-let collateral: UTxO | null = await awaitCollateral(10);
+let collateral: UTxO | null = await awaitCollateral(wallet, 10);
 
 if (collateral === null) {
   throw "Collateral not found";
